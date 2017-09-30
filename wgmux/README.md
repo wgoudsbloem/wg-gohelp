@@ -11,7 +11,7 @@ package main
 import (
     "fmt"
     "net/http"
-    "wgmux/wg-gohelp/wgmux"
+    "github.com/wgoudsbloem/wg-gohelp/wgmux"
 )
 
 func main() {
