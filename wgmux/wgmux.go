@@ -9,28 +9,28 @@ import (
 
 type handler func(http.ResponseWriter, *http.Request)
 
-type Argmap map[string]string
-
 type argType string
 
-var Args argType = "args"
+var argString argType = "args"
 
-type muxer struct {
+type mux struct {
 	handlers map[string]handler
 	*http.ServeMux
 }
 
-func NewMuxer() muxer {
-	m := muxer{make(map[string]handler), http.NewServeMux()}
+// NewMux will return a mux with all http.ServeMux methods
+// and an additional router based func: HandleFuncRouter
+func NewMux() mux {
+	m := mux{make(map[string]handler), http.NewServeMux()}
 	m.HandleFunc("/", m.mainHandler)
 	return m
 }
 
-func (m *muxer) Handle(path string, h handler) {
+func (m *mux) HandleFuncRouter(path string, h handler) {
 	m.handlers[path] = h
 }
 
-func (m *muxer) Get(path string) (h handler, args Argmap) {
+func (m *mux) get(path string) (h handler, args map[string]string) {
 	for k, v := range m.handlers {
 		if ok, _args := urlMatcher(path, k); ok {
 			h = v
@@ -41,14 +41,14 @@ func (m *muxer) Get(path string) (h handler, args Argmap) {
 	return
 }
 
-func (m *muxer) mainHandler(w http.ResponseWriter, r *http.Request) {
-	fn, _args := m.Get(r.URL.Path)
+func (m *mux) mainHandler(w http.ResponseWriter, r *http.Request) {
+	fn, _args := m.get(r.URL.Path)
 	if fn == nil {
 		w.WriteHeader(http.StatusNotFound)
 		fmt.Fprintln(w, "not found :(")
 		return
 	}
-	ctx := context.WithValue(r.Context(), Args, _args)
+	ctx := context.WithValue(r.Context(), argString, _args)
 	fn(w, r.WithContext(ctx))
 }
 
@@ -65,7 +65,7 @@ func urlMatcher(in string, match string) (b bool, m map[string]string) {
 		b = false
 		return
 	}
-	m = make(Argmap)
+	m = make(map[string]string)
 	for i := 0; i < len(ins); i++ {
 		if ins[i] != matches[i] {
 			if matches[i][0] == ':' {
@@ -78,4 +78,9 @@ func urlMatcher(in string, match string) (b bool, m map[string]string) {
 	}
 	b = true
 	return
+}
+
+// GetArgMap retrieves the path arguments in a map[string]string
+func GetArgMap(r *http.Request) map[string]string {
+	return r.Context().Value(argString).(map[string]string)
 }
