@@ -22,7 +22,7 @@ type mux struct {
 // and an additional router based func: HandleFuncRouter
 func NewMux() mux {
 	m := mux{make(map[string]handler), http.NewServeMux()}
-	m.HandleFunc("/", m.mainHandler)
+	m.HandleFunc("/", m.contextHandler)
 	return m
 }
 
@@ -43,7 +43,7 @@ func (m *mux) get(path string) (h handler, args map[string]string) {
 	return
 }
 
-func (m *mux) mainHandler(w http.ResponseWriter, r *http.Request) {
+func (m *mux) contextHandler(w http.ResponseWriter, r *http.Request) {
 	fn, _args := m.get(r.URL.Path)
 	if fn == nil {
 		w.WriteHeader(http.StatusNotFound)
