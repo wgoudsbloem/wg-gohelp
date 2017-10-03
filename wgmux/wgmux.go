@@ -30,6 +30,8 @@ func (m *mux) HandleFuncRouter(path string, h handler) {
 	m.handlers[path] = h
 }
 
+// get the handler matched to the path and a map with path aruments
+// passed path string
 func (m *mux) get(path string) (h handler, args map[string]string) {
 	for k, v := range m.handlers {
 		if ok, _args := urlMatcher(path, k); ok {

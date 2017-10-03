@@ -1,6 +1,7 @@
 package wgmux
 
 import "testing"
+import "net/http"
 
 func TestUrlMatcher(t *testing.T) {
 	testUrlMatcherOk1(t)
@@ -58,5 +59,27 @@ func testUrlMatcherFail2(t *testing.T) {
 	got1, _ := urlMatcher(in, m)
 	if want1 != got1 {
 		t.Errorf("\nwant:\t%+v\ngot:\t%+v", want1, got1)
+	}
+}
+
+func TestGet(t *testing.T) {
+	in1 := "test1"
+	in2 := "test2"
+	in3 := "test3"
+	in := "/" + in1 + "/" + in2 + "/" + in3
+	hdin := func(w http.ResponseWriter, r *http.Request) {}
+	mx := NewMux()
+	mx.HandleFuncRouter("/test1/:arg1/test3", hdin)
+	hndlr, args := mx.get(in)
+	if hndlr == nil {
+		t.Error("handler cannot be nil")
+	}
+	if args == nil {
+		t.Error("args can not be nil")
+	}
+	want := in2
+	got := args[":arg1"]
+	if want != got {
+		t.Errorf("\nwant:\t%+v\ngot:\t%+v", want, got)
 	}
 }
