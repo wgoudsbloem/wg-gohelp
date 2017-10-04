@@ -2,15 +2,11 @@ language: go
 
 go: 1.9
 
-before_install:
-  - go get golang.org/x/tools/cmd/cover
+install:
+  - go get -t ./...
+  - go get code.google.com/p/go.tools/cmd/cover
   - go get github.com/mattn/goveralls
-  - go get github.com/golang/lint/golint
-  - go get github.com/wgoudsbloem/wg-gohelp/wgmux
-  
+
 script:
-  - go test -v -covermode=count -coverprofile=coverage.out
-  - go vet ./...
-  - test -z "$(gofmt -d -s . | tee /dev/stderr)"
-  - test -z "$(golint ./... | tee /dev/stderr)"
-  - $HOME/gopath/bin/goveralls  -coverprofile=coverage.out -service=travis-ci
+  - PATH="$HOME/gopath/bin:$PATH"
+  - script/coverage --coveralls
