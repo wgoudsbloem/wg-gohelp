@@ -9,5 +9,4 @@ before_install:
   - go get github.com/mattn/goveralls
 
 script:
-  - PATH="$HOME/gopath/bin:$PATH"
-  - script/coverage --coveralls
+  - $GOPATH/bin/goveralls -service=travis-ci
