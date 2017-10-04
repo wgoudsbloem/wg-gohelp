@@ -83,6 +83,11 @@ func urlMatcher(in string, match string) (b bool, m map[string]string) {
 }
 
 // GetArgMap retrieves the path arguments in a map[string]string
-func GetArgMap(r *http.Request) map[string]string {
-	return r.Context().Value(argString).(map[string]string)
+func GetArgMap(r *http.Request) (map[string]string, bool) {
+	ctx := r.Context().Value(argString)
+	if ctx == nil {
+		return nil, false
+	}
+	m, ok := ctx.(map[string]string)
+	return m, ok
 }

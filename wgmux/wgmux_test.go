@@ -99,9 +99,10 @@ func testContextHandlerOK(t *testing.T) {
 	in3 := "test3"
 	in := "/" + in1 + "/" + in2 + "/" + in3
 	hdin := func(w http.ResponseWriter, r *http.Request) {
-		got := GetArgMap(r)[":arg1"]
+		gotMap, ok := GetArgMap(r)
 		want := in2
-		if want != got {
+		got := gotMap[":arg1"]
+		if !ok || want != got {
 			t.Errorf("\nwant:\t%+v\ngot:\t%+v", want, got)
 		}
 	}
@@ -143,7 +144,12 @@ func testContextHandlerFail(t *testing.T) {
 	}
 }
 
-func TestGetArgs(t *testing.T) {
+func TestGetArgMap(t *testing.T) {
+	testGetArgMapOK(t)
+	testGetArgMapFail(t)
+}
+
+func testGetArgMapOK(t *testing.T) {
 	req, err := http.NewRequest("GET", "/", nil)
 	if err != nil {
 		t.Error(err)
@@ -153,10 +159,25 @@ func TestGetArgs(t *testing.T) {
 	value := "value"
 	m[key] = value
 	ctx := context.WithValue(req.Context(), argString, m)
-	gotMap := GetArgMap(req.WithContext(ctx))
+	gotMap, ok := GetArgMap(req.WithContext(ctx))
+	if !ok {
+		t.Errorf("\nwant:\t%+v\ngot:\t%+v", m, gotMap)
+	}
 	got := gotMap[key]
 	want := value
 	if want != got {
 		t.Errorf("\nwant:\t%+v\ngot:\t%+v", want, got)
+	}
+}
+
+func testGetArgMapFail(t *testing.T) {
+	req, err := http.NewRequest("GET", "/", nil)
+	if err != nil {
+		t.Error(err)
+	}
+	m := make(map[string]string)
+	gotMap, ok := GetArgMap(req)
+	if ok {
+		t.Errorf("\nwant:\t%+v\ngot:\t%+v", m, gotMap)
 	}
 }
