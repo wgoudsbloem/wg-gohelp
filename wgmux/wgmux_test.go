@@ -1,8 +1,11 @@
 package wgmux
 
-import "testing"
-import "net/http"
-import "net/http/httptest"
+import (
+	"context"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+)
 
 func TestUrlMatcher(t *testing.T) {
 	testUrlMatcherOk1(t)
@@ -85,7 +88,12 @@ func TestGet(t *testing.T) {
 	}
 }
 
-func TestMainHandler(t *testing.T) {
+func TestContextHandler(t *testing.T) {
+	testContextHandlerOK(t)
+	testContextHandlerFail(t)
+}
+
+func testContextHandlerOK(t *testing.T) {
 	in1 := "test1"
 	in2 := "test2"
 	in3 := "test3"
@@ -105,4 +113,50 @@ func TestMainHandler(t *testing.T) {
 	}
 	rr := httptest.NewRecorder()
 	mx.contextHandler(rr, req)
+	want := http.StatusOK
+	got := rr.Result().StatusCode
+	if want != got {
+		t.Errorf("\nwant:\t%+v\ngot:\t%+v", want, got)
+	}
+}
+
+func testContextHandlerFail(t *testing.T) {
+	in1 := "testA"
+	in2 := "testB"
+	in3 := "testC"
+	in := "/" + in1 + "/" + in2 + "/" + in3
+	hdin := func(w http.ResponseWriter, r *http.Request) {
+
+	}
+	mx := NewMux()
+	mx.HandleFuncRouter("/test1/:arg1/test3", hdin)
+	req, err := http.NewRequest("GET", in, nil)
+	if err != nil {
+		t.Error(err)
+	}
+	rr := httptest.NewRecorder()
+	mx.contextHandler(rr, req)
+	want := http.StatusNotFound
+	got := rr.Result().StatusCode
+	if want != got {
+		t.Errorf("\nwant:\t%+v\ngot:\t%+v", want, got)
+	}
+}
+
+func TestGetArgs(t *testing.T) {
+	req, err := http.NewRequest("GET", "/", nil)
+	if err != nil {
+		t.Error(err)
+	}
+	m := make(map[string]string)
+	key := "key"
+	value := "value"
+	m[key] = value
+	ctx := context.WithValue(req.Context(), argString, m)
+	gotMap := GetArgMap(req.WithContext(ctx))
+	got := gotMap[key]
+	want := value
+	if want != got {
+		t.Errorf("\nwant:\t%+v\ngot:\t%+v", want, got)
+	}
 }
