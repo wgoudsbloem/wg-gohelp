@@ -74,7 +74,7 @@ func TestGet(t *testing.T) {
 	hdin := func(w http.ResponseWriter, r *http.Request) {}
 	mx := NewMux()
 	mx.HandleFuncRouter("/test1/:arg1/test3", hdin)
-	hndlr, args := mx.get(in)
+	hndlr, args := mx.getHandler(in)
 	if hndlr == nil {
 		t.Error("handler cannot be nil")
 	}

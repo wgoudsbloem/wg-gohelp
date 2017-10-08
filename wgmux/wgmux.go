@@ -30,9 +30,9 @@ func (m *mux) HandleFuncRouter(path string, h handler) {
 	m.handlers[path] = h
 }
 
-// get the handler matched to the path and a map with path aruments
+// getHandler the handler matched to the path and a map with path aruments
 // passed path string
-func (m *mux) get(path string) (h handler, args map[string]string) {
+func (m *mux) getHandler(path string) (h handler, args map[string]string) {
 	for k, v := range m.handlers {
 		if ok, _args := urlMatcher(path, k); ok {
 			h = v
@@ -44,7 +44,7 @@ func (m *mux) get(path string) (h handler, args map[string]string) {
 }
 
 func (m *mux) contextHandler(w http.ResponseWriter, r *http.Request) {
-	fn, _args := m.get(r.URL.Path)
+	fn, _args := m.getHandler(r.URL.Path)
 	if fn == nil {
 		w.WriteHeader(http.StatusNotFound)
 		fmt.Fprintln(w, "not found :(")
