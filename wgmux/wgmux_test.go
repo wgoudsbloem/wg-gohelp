@@ -66,7 +66,7 @@ func testUrlMatcherFail2(t *testing.T) {
 	}
 }
 
-func TestGet(t *testing.T) {
+func TestHandlerWithArgs(t *testing.T) {
 	in1 := "test1"
 	in2 := "test2"
 	in3 := "test3"
@@ -74,7 +74,7 @@ func TestGet(t *testing.T) {
 	hdin := func(w http.ResponseWriter, r *http.Request) {}
 	mx := NewMux()
 	mx.HandleFuncRouter("/test1/:arg1/test3", hdin)
-	hndlr, args := mx.getHandler(in)
+	hndlr, args := mx.handlerWithArgs(in)
 	if hndlr == nil {
 		t.Error("handler cannot be nil")
 	}
