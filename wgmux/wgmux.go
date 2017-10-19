@@ -7,6 +7,8 @@ import (
 	"strings"
 )
 
+const MethodAny string = "ANY"
+
 type handler func(http.ResponseWriter, *http.Request)
 
 type argType string
@@ -14,26 +16,32 @@ type argType string
 var argString argType = "args"
 
 type mux struct {
-	handlers map[string]handler
+	handlers map[string]map[string]handler
 	*http.ServeMux
 }
 
 // NewMux will return a mux with all http.ServeMux methods
 // and an additional router based func: HandleFuncRouter
 func NewMux() mux {
-	m := mux{make(map[string]handler), http.NewServeMux()}
+	m := mux{make(map[string]map[string]handler), http.NewServeMux()}
 	m.HandleFunc("/", m.contextHandler)
 	return m
 }
 
 func (m *mux) HandleFuncRouter(path string, h handler) {
-	m.handlers[path] = h
+	m.HandleFuncRouterMethod(MethodAny, path, h)
+}
+
+func (m *mux) HandleFuncRouterMethod(method, path string, h handler) {
+	mh := make(map[string]handler)
+	mh[path] = h
+	m.handlers[method] = mh
 }
 
 // handlerWithArgs the handler matched to the path and a map with path aruments
 // passed path string
-func (m *mux) handlerWithArgs(path string) (h handler, args map[string]string) {
-	for k, v := range m.handlers {
+func (m *mux) handlerWithArgs(method, path string) (h handler, args map[string]string) {
+	for k, v := range m.handlers[method] {
 		if ok, _args := urlMatcher(path, k); ok {
 			h = v
 			args = _args
@@ -44,7 +52,7 @@ func (m *mux) handlerWithArgs(path string) (h handler, args map[string]string) {
 }
 
 func (m *mux) contextHandler(w http.ResponseWriter, r *http.Request) {
-	fn, _args := m.handlerWithArgs(r.URL.Path)
+	fn, _args := m.handlerWithArgs(r.Method, r.URL.Path)
 	if fn == nil {
 		w.WriteHeader(http.StatusNotFound)
 		fmt.Fprintln(w, "not found :(")

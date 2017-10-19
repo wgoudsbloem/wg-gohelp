@@ -74,7 +74,7 @@ func TestHandlerWithArgs(t *testing.T) {
 	hdin := func(w http.ResponseWriter, r *http.Request) {}
 	mx := NewMux()
 	mx.HandleFuncRouter("/test1/:arg1/test3", hdin)
-	hndlr, args := mx.handlerWithArgs(in)
+	hndlr, args := mx.handlerWithArgs(MethodAny, in)
 	if hndlr == nil {
 		t.Error("handler cannot be nil")
 	}
@@ -107,7 +107,7 @@ func testContextHandlerOK(t *testing.T) {
 		}
 	}
 	mx := NewMux()
-	mx.HandleFuncRouter("/test1/:arg1/test3", hdin)
+	mx.HandleFuncRouterMethod(http.MethodGet, "/test1/:arg1/test3", hdin)
 	req, err := http.NewRequest("GET", in, nil)
 	if err != nil {
 		t.Error(err)
