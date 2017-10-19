@@ -12,6 +12,7 @@ func TestUrlMatcher(t *testing.T) {
 	testUrlMatcherOk2(t)
 	testUrlMatcherFail(t)
 	testUrlMatcherFail2(t)
+	testUrlMatcherFail3(t)
 }
 
 func testUrlMatcherOk1(t *testing.T) {
@@ -57,8 +58,18 @@ func testUrlMatcherFail(t *testing.T) {
 }
 
 func testUrlMatcherFail2(t *testing.T) {
-	in := "make/audi/"
+	in := "/make/audi/"
 	m := "/make/:make/model/:model"
+	want1 := false
+	got1, _ := urlMatcher(in, m)
+	if want1 != got1 {
+		t.Errorf("\nwant:\t%+v\ngot:\t%+v", want1, got1)
+	}
+}
+
+func testUrlMatcherFail3(t *testing.T) {
+	in := "/make/audi/model/a4"
+	m := "/make/:make/model/model"
 	want1 := false
 	got1, _ := urlMatcher(in, m)
 	if want1 != got1 {
