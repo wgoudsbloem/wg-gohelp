@@ -2,7 +2,6 @@ package wgmux
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -256,7 +255,7 @@ func TestServerIntegrationOK2(t *testing.T) {
 
 func eq(want, got interface{}) error {
 	if want != got {
-		return errors.New(fmt.Sprintf("\nwant:\t%+v\ngot:\t%+v", want, got))
+		return fmt.Errorf("\nwant:\t%+v\ngot:\t%+v", want, got)
 	}
 	return nil
 }
