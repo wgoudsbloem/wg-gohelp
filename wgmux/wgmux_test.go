@@ -38,6 +38,7 @@ func TestUrlMatcherOk2(t *testing.T) {
 	if got2[":make"] != want2[":make"] {
 		t.Errorf("\nwant:\t%+v\ngot:\t%+v", want2, got2)
 	}
+	t.Logf("\n\tin:\t%+v\n\tm:\t%+v\n", in, m)
 }
 
 func TestUrlMatcherOk3(t *testing.T) {
@@ -54,6 +55,7 @@ func TestUrlMatcherOk3(t *testing.T) {
 	if got2[":make"] != want2[":make"] {
 		t.Errorf("\nwant:\t%+v\ngot:\t%+v", want2, got2)
 	}
+	t.Logf("\n\tin:\t%+v\n\tm:\t%+v\n", in, m)
 }
 
 func TestUrlMatcherFail(t *testing.T) {
@@ -64,6 +66,7 @@ func TestUrlMatcherFail(t *testing.T) {
 	if want1 != got1 {
 		t.Errorf("\nwant:\t%+v\ngot:\t%+v", want1, got1)
 	}
+	t.Logf("\n\tin:\t%+v\n\tm:\t%+v\n", in, m)
 }
 
 func TestUrlMatcherFail2(t *testing.T) {
@@ -74,6 +77,7 @@ func TestUrlMatcherFail2(t *testing.T) {
 	if want1 != got1 {
 		t.Errorf("\nwant:\t%+v\ngot:\t%+v", want1, got1)
 	}
+	t.Logf("\n\tin:\t%+v\n\tm:\t%+v\n", in, m)
 }
 
 func TestHandlerWithArgs(t *testing.T) {
@@ -91,11 +95,7 @@ func TestHandlerWithArgs(t *testing.T) {
 	if args == nil {
 		t.Error("args can not be nil")
 	}
-	want := in2
-	got := args[":arg1"]
-	if want != got {
-		t.Errorf("\nwant:\t%+v\ngot:\t%+v", want, got)
-	}
+	eq(in2, args[":arg1"], t)
 }
 
 func TestContextHandlerOK(t *testing.T) {
@@ -119,11 +119,7 @@ func TestContextHandlerOK(t *testing.T) {
 	}
 	rr := httptest.NewRecorder()
 	mx.contextHandler(rr, req)
-	want := http.StatusOK
-	got := rr.Result().StatusCode
-	if want != got {
-		t.Errorf("\nwant:\t%+v\ngot:\t%+v", want, got)
-	}
+	eq(http.StatusOK, rr.Result().StatusCode, t)
 }
 
 func TestContextHandlerOK2(t *testing.T) {
@@ -147,11 +143,7 @@ func TestContextHandlerOK2(t *testing.T) {
 	}
 	rr := httptest.NewRecorder()
 	mx.contextHandler(rr, req)
-	want := http.StatusOK
-	got := rr.Result().StatusCode
-	if want != got {
-		t.Errorf("\nwant:\t%+v\ngot:\t%+v", want, got)
-	}
+	eq(http.StatusOK, rr.Result().StatusCode, t)
 }
 
 func TestContextHandlerFail(t *testing.T) {
@@ -172,9 +164,7 @@ func TestContextHandlerFail(t *testing.T) {
 	mx.contextHandler(rr, req)
 	want := http.StatusNotFound
 	got := rr.Result().StatusCode
-	if want != got {
-		t.Errorf("\nwant:\t%+v\ngot:\t%+v", want, got)
-	}
+	eq(http.StatusOK, rr.Result().StatusCode, t)
 }
 
 func TestGetArgMapOK(t *testing.T) {
@@ -191,11 +181,7 @@ func TestGetArgMapOK(t *testing.T) {
 	if !ok {
 		t.Errorf("\nwant:\t%+v\ngot:\t%+v", m, gotMap)
 	}
-	got := gotMap[key]
-	want := value
-	if want != got {
-		t.Errorf("\nwant:\t%+v\ngot:\t%+v", want, got)
-	}
+	eq(value, gotMap[key], t)
 }
 
 func TestGetArgMapFail(t *testing.T) {
