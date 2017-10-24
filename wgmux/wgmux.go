@@ -54,15 +54,22 @@ func (m *mux) contextHandler(w http.ResponseWriter, r *http.Request) {
 	fn(w, r.WithContext(ctx))
 }
 
-func urlMatcher(in string, match string) (b bool, m map[string]string) {
+func urlMatcher(in, match string) (b bool, m map[string]string) {
+	// strip off everything after a possible ? and add a /
+	for i, v := range in {
+		if v == '?' {
+			in = in[:i]
+		}
+	}
 	if in[len(in)-1] != '/' {
 		in += "/"
 	}
-	ins := strings.Split(in, "/")
+	// add a trailing slash if it doesn't have one to match up the in
 	if match[len(match)-1] != '/' {
 		match += "/"
 	}
 	matches := strings.Split(match, "/")
+	ins := strings.Split(in, "/")
 	if len(ins) != len(matches) {
 		b = false
 		return
