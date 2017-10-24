@@ -2,6 +2,8 @@ package wgmux
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -95,7 +97,9 @@ func TestHandlerWithArgs(t *testing.T) {
 	if args == nil {
 		t.Error("args can not be nil")
 	}
-	eq(in2, args[":arg1"], t)
+	if err := eq(in2, args[":arg1"]); err != nil {
+		t.Error(err)
+	}
 }
 
 func TestContextHandlerOK(t *testing.T) {
@@ -119,7 +123,9 @@ func TestContextHandlerOK(t *testing.T) {
 	}
 	rr := httptest.NewRecorder()
 	mx.contextHandler(rr, req)
-	eq(http.StatusOK, rr.Result().StatusCode, t)
+	if err := eq(http.StatusOK, rr.Result().StatusCode); err != nil {
+		t.Error(err)
+	}
 }
 
 func TestContextHandlerOK2(t *testing.T) {
@@ -143,7 +149,9 @@ func TestContextHandlerOK2(t *testing.T) {
 	}
 	rr := httptest.NewRecorder()
 	mx.contextHandler(rr, req)
-	eq(http.StatusOK, rr.Result().StatusCode, t)
+	if err := eq(http.StatusOK, rr.Result().StatusCode); err != nil {
+		t.Error(err)
+	}
 }
 
 func TestContextHandlerFail(t *testing.T) {
@@ -162,9 +170,9 @@ func TestContextHandlerFail(t *testing.T) {
 	}
 	rr := httptest.NewRecorder()
 	mx.contextHandler(rr, req)
-	want := http.StatusNotFound
-	got := rr.Result().StatusCode
-	eq(http.StatusOK, rr.Result().StatusCode, t)
+	if err := eq(http.StatusOK, rr.Result().StatusCode); err == nil {
+		t.Error(err)
+	}
 }
 
 func TestGetArgMapOK(t *testing.T) {
@@ -181,7 +189,9 @@ func TestGetArgMapOK(t *testing.T) {
 	if !ok {
 		t.Errorf("\nwant:\t%+v\ngot:\t%+v", m, gotMap)
 	}
-	eq(value, gotMap[key], t)
+	if err := eq(value, gotMap[key]); err != nil {
+		t.Error(err)
+	}
 }
 
 func TestGetArgMapFail(t *testing.T) {
@@ -212,15 +222,21 @@ func TestServerIntegrationOK1(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	eq(http.StatusOK, r.StatusCode, t)
+	if err := eq(http.StatusOK, r.StatusCode); err != nil {
+		t.Error(err)
+	}
 }
 
 func TestServerIntegrationOK2(t *testing.T) {
 	m := NewMux()
 	h := func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		eq("123", r.URL.Query().Get("abc"), t)
-		eq(http.MethodPost, r.Method, t)
+		if err := eq("123", r.URL.Query().Get("abc")); err != nil {
+			t.Error(err)
+		}
+		if err := eq(http.MethodPost, r.Method); err != nil {
+			t.Error(err)
+		}
 	}
 	m.HandleFuncRouter("/test/", h)
 	ts := httptest.NewServer(m)
@@ -233,11 +249,14 @@ func TestServerIntegrationOK2(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	eq(http.StatusOK, resp.StatusCode, t)
+	if err := eq(http.StatusOK, resp.StatusCode); err != nil {
+		t.Error(err)
+	}
 }
 
-func eq(want, got interface{}, t *testing.T) {
+func eq(want, got interface{}) error {
 	if want != got {
-		t.Errorf("\nwant:\t%+v\ngot:\t%+v", want, got)
+		return errors.New(fmt.Sprintf("\nwant:\t%+v\ngot:\t%+v", want, got))
 	}
+	return nil
 }
